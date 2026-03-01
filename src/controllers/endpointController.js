@@ -4,7 +4,14 @@ const Project = require("../models/project");
 // CREATE ENDPOINT
 const createEndpoint = async (req, res) => {
   try {
-    const { method, path, statusCode, responseSchema } = req.body;
+    const {
+  method,
+  path,
+  statusCode,
+  responseSchema,
+  headers,
+  delay
+} = req.body;
 
         // 🔥 Validate responseSchema exists
     if (!responseSchema || !responseSchema.fields) {
@@ -36,13 +43,15 @@ const createEndpoint = async (req, res) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    const endpoint = await Endpoint.create({
-      method,
-      path,
-      statusCode,
-      responseSchema,
-      projectId: project._id
-    });
+  const endpoint = await Endpoint.create({
+  method,
+  path,
+  statusCode,
+  responseSchema,
+  headers,
+  delay,
+  projectId: project._id
+});
 
     res.status(201).json(endpoint);
 
