@@ -35,7 +35,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api", endpointRoutes);
 
  //dynamic mock routes
-app.use("/", mockRoutes);
+app.use("/mock", mockRoutes);
 
 // Root route
 app.get("/", (req, res) => {
