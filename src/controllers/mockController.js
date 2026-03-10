@@ -101,8 +101,8 @@ function generateObject(fields = []) {
 
 exports.handleMockRequest = async (req, res) => {
   try {
-    const projectId = req.params[0];
-    const dynamicPath = req.params[1];
+    const projectId = req.params.projectId;
+    const dynamicPath = req.params.endpoint;
 
     const method = req.method.toUpperCase();
     const requestedPath = "/" + (dynamicPath || "");
