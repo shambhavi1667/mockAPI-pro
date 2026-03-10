@@ -106,8 +106,8 @@ exports.handleMockRequest = async (req, res) => {
     console.log("Path:", req.path);
     console.log("Original URL:", req.originalUrl);
 
-    const projectId = req.params.projectId;
-    const dynamicPath = req.params.endpoint;
+   const projectId = req.params.path[0];
+   const dynamicPath = req.params.path[1];
 
     const method = req.method.toUpperCase();
     const requestedPath = "/" + (dynamicPath || "");
