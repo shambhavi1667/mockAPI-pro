@@ -4,7 +4,7 @@ const Project = require("../models/project");
 const { faker } = require("@faker-js/faker");
 
 /* ----------------------------------
-   Route Matcher (Day 8–9)
+   Route Matcher
 ----------------------------------- */
 function matchRoute(dbPath, requestedPath) {
   const dbParts = dbPath.split("/").filter(Boolean);
@@ -21,9 +21,8 @@ function matchRoute(dbPath, requestedPath) {
 }
 
 /* ----------------------------------
-   Data Generation Engine (Day 10–11)
+   Data Generation Engine
 ----------------------------------- */
-
 function generateField(field) {
   if (field.defaultValue !== undefined) {
     return field.defaultValue;
@@ -96,21 +95,24 @@ function generateObject(fields = []) {
 }
 
 /* ----------------------------------
-   Main Mock Handler (Day 12–13 Final)
+   Main Mock Handler
 ----------------------------------- */
-
 exports.handleMockRequest = async (req, res) => {
   try {
-
+    console.log("🔥 mock route hit");
     console.log("Params:", req.params);
-    console.log("Path:", req.path);
     console.log("Original URL:", req.originalUrl);
 
-   const projectId = req.params.path[0];
-   const dynamicPath = req.params.path[1];
+    const projectId = req.params.projectId;
+
+    // ✅ FIXED PATH EXTRACTION
+    const basePath = `/mock/${projectId}`;
+    const dynamicPath = req.originalUrl.replace(basePath, "");
+    const requestedPath = dynamicPath || "/";
 
     const method = req.method.toUpperCase();
-    const requestedPath = "/" + (dynamicPath || "");
+
+    console.log("Requested Path:", requestedPath);
 
     /* ----------------------------
        1️⃣ Validate Project
@@ -153,7 +155,12 @@ exports.handleMockRequest = async (req, res) => {
     let matchedEndpoint = null;
 
     for (const endpoint of endpoints) {
-      if (matchRoute(endpoint.path, requestedPath)) {
+      // ✅ NORMALIZE DB PATH
+      const normalizedDbPath = endpoint.path.startsWith("/")
+        ? endpoint.path
+        : "/" + endpoint.path;
+
+      if (matchRoute(normalizedDbPath, requestedPath)) {
         matchedEndpoint = endpoint;
         break;
       }
@@ -170,7 +177,7 @@ exports.handleMockRequest = async (req, res) => {
     }
 
     /* ----------------------------
-       4️⃣ Delay Simulation (FIXED)
+       4️⃣ Delay Simulation
     ----------------------------- */
     const delay = matchedEndpoint.delay || 0;
 
@@ -181,11 +188,11 @@ exports.handleMockRequest = async (req, res) => {
     }
 
     /* ----------------------------
-       5️⃣ Custom Headers Support
+       5️⃣ Custom Headers
     ----------------------------- */
     if (matchedEndpoint.headers) {
-      for (const [key, value] of matchedEndpoint.headers.entries()) {
-        res.setHeader(key, value);
+      for (const key in matchedEndpoint.headers) {
+        res.setHeader(key, matchedEndpoint.headers[key]);
       }
     }
 
