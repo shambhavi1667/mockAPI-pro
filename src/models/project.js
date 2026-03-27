@@ -38,4 +38,5 @@ projectSchema.pre("save", function () {
       .toString("hex");
   }
 });
+projectSchema.index({ userId: 1 });
 module.exports = mongoose.model("Project", projectSchema);

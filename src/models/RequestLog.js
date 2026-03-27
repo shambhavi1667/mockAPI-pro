@@ -32,4 +32,6 @@ const requestLogSchema = new mongoose.Schema(
 // 🔥 Auto-delete logs after 30 days (VERY IMPORTANT)
 requestLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 2592000 });
 
+requestLogSchema.index({ projectId: 1 });
+
 module.exports = mongoose.model("RequestLog", requestLogSchema);

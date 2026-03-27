@@ -1,15 +1,18 @@
 const Project = require("../models/project");
 const RequestLog = require("../models/RequestLog");
 const mongoose = require("mongoose");
+const { validationResult } = require("express-validator");
 
 // CREATE PROJECT
-const createProject = async (req, res) => {
+const createProject = async (req, res, next) => {
   try {
-    const { name, description } = req.body;
+    const errors = validationResult(req);
 
-    if (!name) {
-      return res.status(400).json({ message: "Project name is required" });
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+
+    const { name, description } = req.body;
 
     const project = await Project.create({
       name,
@@ -20,24 +23,23 @@ const createProject = async (req, res) => {
     res.status(201).json(project);
 
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
 // GET ALL PROJECTS
-const getProjects = async (req, res) => {
+const getProjects = async (req, res, next) => {
   try {
     const projects = await Project.find({ userId: req.user._id });
     res.json(projects);
 
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
 // UPDATE PROJECT
-const updateProject = async (req, res) => {
+const updateProject = async (req, res, next) => {
   try {
     const { name, description } = req.body;
 
@@ -54,12 +56,12 @@ const updateProject = async (req, res) => {
     res.json(project);
 
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
 // DELETE PROJECT
-const deleteProject = async (req, res) => {
+const deleteProject = async (req, res, next) => {
   try {
     const project = await Project.findOneAndDelete({
       _id: req.params.id,
@@ -73,22 +75,20 @@ const deleteProject = async (req, res) => {
     res.json({ message: "Project deleted successfully" });
 
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-// 🔥 ANALYTICS FUNCTION (NEW)
-const getProjectAnalytics = async (req, res) => {
+// ANALYTICS
+const getProjectAnalytics = async (req, res, next) => {
   try {
     const { projectId } = req.params;
     const objectId = new mongoose.Types.ObjectId(projectId);
 
-    // Total requests
     const totalRequests = await RequestLog.countDocuments({
       projectId: objectId
     });
 
-    // Top endpoints
     const topEndpoints = await RequestLog.aggregate([
       { $match: { projectId: objectId } },
       {
@@ -101,7 +101,6 @@ const getProjectAnalytics = async (req, res) => {
       { $limit: 5 }
     ]);
 
-    // Requests over time
     const requestsOverTime = await RequestLog.aggregate([
       { $match: { projectId: objectId } },
       {
@@ -122,8 +121,7 @@ const getProjectAnalytics = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Analytics error" });
+    next(error);
   }
 };
 
