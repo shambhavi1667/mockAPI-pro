@@ -1,4 +1,6 @@
 const Project = require("../models/project");
+const RequestLog = require("../models/RequestLog");
+const mongoose = require("mongoose");
 
 // CREATE PROJECT
 const createProject = async (req, res) => {
@@ -18,12 +20,12 @@ const createProject = async (req, res) => {
     res.status(201).json(project);
 
   } catch (error) {
-  console.log(error);   // 👈 ADD THIS
-  res.status(500).json({ message: error.message });
-}
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
 };
 
-// GET ALL PROJECTS (only current user’s)
+// GET ALL PROJECTS
 const getProjects = async (req, res) => {
   try {
     const projects = await Project.find({ userId: req.user._id });
@@ -75,9 +77,60 @@ const deleteProject = async (req, res) => {
   }
 };
 
+// 🔥 ANALYTICS FUNCTION (NEW)
+const getProjectAnalytics = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const objectId = new mongoose.Types.ObjectId(projectId);
+
+    // Total requests
+    const totalRequests = await RequestLog.countDocuments({
+      projectId: objectId
+    });
+
+    // Top endpoints
+    const topEndpoints = await RequestLog.aggregate([
+      { $match: { projectId: objectId } },
+      {
+        $group: {
+          _id: "$endpoint",
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ]);
+
+    // Requests over time
+    const requestsOverTime = await RequestLog.aggregate([
+      { $match: { projectId: objectId } },
+      {
+        $group: {
+          _id: {
+            day: { $dayOfMonth: "$createdAt" },
+            month: { $month: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    res.json({
+      totalRequests,
+      topEndpoints,
+      requestsOverTime
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Analytics error" });
+  }
+};
+
 module.exports = {
   createProject,
   getProjects,
   updateProject,
-  deleteProject
+  deleteProject,
+  getProjectAnalytics
 };

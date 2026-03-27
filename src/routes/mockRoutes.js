@@ -12,8 +12,8 @@ router.use("/:projectId", (req, res, next) => {
 });
 
 // Main mock handler
-router.use(
-  "/:projectId",
+router.all(
+  "/:projectId/*path",
   rateLimiter,
   logRequest,
   mockController.handleMockRequest

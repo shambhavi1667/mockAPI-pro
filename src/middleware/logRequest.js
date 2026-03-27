@@ -9,14 +9,15 @@ const logRequest = (req, res, next) => {
         try {
             await RequestLog.create({
                 projectId: req.params.projectId,
-                endpoint: req.params[0],
+                endpoint: req.originalUrl, // ✅ FIXED
                 method: req.method,
+                statusCode: res.statusCode, // ✅ ADDED
                 ip: req.ip,
                 userAgent: req.headers["user-agent"],
                 responseTime: duration
             });
         } catch (err) {
-            console.error("Log error:", err);
+            console.error("Log error:", err.message);
         }
     });
 

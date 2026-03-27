@@ -6,12 +6,15 @@ const {
   createProject,
   getProjects,
   updateProject,
-  deleteProject
+  deleteProject,
+  getProjectAnalytics 
 } = require("../controllers/projectController");
 
 router.post("/", authMiddleware, createProject);
 router.get("/", authMiddleware, getProjects);
 router.put("/:id", authMiddleware, updateProject);
 router.delete("/:id", authMiddleware, deleteProject);
+
+router.get("/:projectId/analytics", authMiddleware, getProjectAnalytics);
 
 module.exports = router;
