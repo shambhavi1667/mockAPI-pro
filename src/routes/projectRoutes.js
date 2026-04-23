@@ -6,6 +6,7 @@ const { body } = require("express-validator");
 const {
   createProject,
   getProjects,
+  getProjectById,
   updateProject,
   deleteProject,
   getProjectAnalytics 
@@ -37,5 +38,7 @@ router.delete("/:id", authMiddleware, deleteProject);
 
 // ANALYTICS
 router.get("/:projectId/analytics", authMiddleware, getProjectAnalytics);
+
+router.get("/:id", getProjectById);
 
 module.exports = router;

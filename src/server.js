@@ -47,6 +47,10 @@ app.get("/", (req, res) => {
   res.json({ message: "MockAPI Pro Backend Running 🚀" });
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
+});
+
 app.use(errorHandler);
 
 // ----------------------

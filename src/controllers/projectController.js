@@ -38,6 +38,25 @@ const getProjects = async (req, res, next) => {
   }
 };
 
+// 🆕 GET SINGLE PROJECT BY ID (FIX FOR YOUR ERROR)
+const getProjectById = async (req, res, next) => {
+  try {
+    const project = await Project.findOne({
+      _id: req.params.id,
+      userId: req.user._id
+    });
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    res.json(project);
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 // UPDATE PROJECT
 const updateProject = async (req, res, next) => {
   try {
@@ -128,6 +147,7 @@ const getProjectAnalytics = async (req, res, next) => {
 module.exports = {
   createProject,
   getProjects,
+  getProjectById, // ⭐ IMPORTANT ADD
   updateProject,
   deleteProject,
   getProjectAnalytics
