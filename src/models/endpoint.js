@@ -85,6 +85,11 @@ const endpointSchema = new mongoose.Schema(
       default: 0
     },
 
+     response: {
+  type: String,
+  default: "{}"
+},
+
     responseSchema: {
       count: {
         type: Number,
@@ -95,10 +100,7 @@ const endpointSchema = new mongoose.Schema(
         required: true
       }
     },
-    response: {
-  type: String,
-  default: "{}"
-},
+  
 
     projectId: {
       type: mongoose.Schema.Types.ObjectId,

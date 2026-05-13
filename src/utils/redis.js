@@ -1,4 +1,4 @@
-const Redis = require("ioredis");
+/*const Redis = require("ioredis");
 
 console.log("REDIS_URL:", process.env.REDIS_URL); // 👈 Debug line
 
@@ -10,6 +10,6 @@ redis.on("connect", () => {
 
 redis.on("error", (err) => {
   console.error("❌ Redis error:", err);
-});
+}); */
 
-module.exports = redis;
+module.exports = null;

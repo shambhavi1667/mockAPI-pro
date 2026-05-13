@@ -199,24 +199,50 @@ exports.handleMockRequest = async (req, res) => {
     /* ----------------------------
        6️⃣ Generate Response
     ----------------------------- */
-    const { fields, count } = matchedEndpoint.responseSchema || {};
-
-    if (!fields || fields.length === 0) {
-      return res.status(matchedEndpoint.statusCode || 200).json({});
-    }
-
-    const results = [];
-
-    for (let i = 0; i < (count || 1); i++) {
-      results.push(generateObject(fields));
-    }
-
+// ✅ PRIORITY 1 → Manual JSON response
+if (
+  matchedEndpoint.response &&
+  matchedEndpoint.response !== "{}"
+) {
+  try {
     return res
       .status(matchedEndpoint.statusCode || 200)
-      .json(results);
+      .json(JSON.parse(matchedEndpoint.response));
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: "INVALID_JSON",
+        message: "Stored response is invalid JSON"
+      }
+    });
+  }
+}
+
+// ✅ PRIORITY 2 → Faker schema generation
+const { fields, count } =
+  matchedEndpoint.responseSchema || {};
+
+if (!fields || fields.length === 0) {
+  return res
+    .status(matchedEndpoint.statusCode || 200)
+    .json({});
+}
+
+const results = [];
+
+for (let i = 0; i < (count || 1); i++) {
+  results.push(generateObject(fields));
+}
+
+return res
+  .status(matchedEndpoint.statusCode || 200)
+  .json(results);
+
 
   } catch (error) {
     console.error(error);
+
     return res.status(500).json({
       success: false,
       error: {

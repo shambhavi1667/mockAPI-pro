@@ -27,28 +27,42 @@ function ProjectDetails() {
       .then(setEndpoints);
   }, [id, token]);
 
-  const createEndpoint = async () => {
-    const path = prompt("Enter endpoint path");
-    if (!path) return;
+ const createEndpoint = async () => {
+  const path = prompt("Enter endpoint path");
+  if (!path) return;
 
-    const method = prompt("Enter method (GET, POST, etc)");
-    if (!method) return;
+  const method = prompt("Enter method (GET, POST, etc)");
+  if (!method) return;
 
-    const res = await fetch(
-      `http://localhost:5000/api/projects/${id}/endpoints`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ path, method }),
-      }
-    );
+  const res = await fetch(
+    `http://localhost:5000/api/projects/${id}/endpoints`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
 
-    const data = await res.json();
-    setEndpoints((prev) => [...prev, data]);
-  };
+      body: JSON.stringify({
+        path,
+        method,
+        responseSchema: {
+          count: 1,
+          fields: [
+            {
+              name: "message",
+              type: "string"
+            }
+          ]
+        }
+      }),
+    }
+  );
+
+  const data = await res.json();
+
+  setEndpoints((prev) => [...prev, data]);
+};
 
   const deleteEndpoint = async (endpointId) => {
     await fetch(`http://localhost:5000/api/endpoints/${endpointId}`, {
