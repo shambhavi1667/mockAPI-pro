@@ -13,6 +13,7 @@ const userRoutes = require("./routes/userRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const endpointRoutes = require("./routes/endpointRoutes");
 const mockRoutes = require("./routes/mockRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 
 const app = express();
 
@@ -35,6 +36,8 @@ app.use("/api/users", userRoutes);
 
 // Projects CRUD
 app.use("/api/projects", projectRoutes);
+
+app.use("/api", analyticsRoutes);
 
 // Endpoints CRUD
 app.use("/api", endpointRoutes);

@@ -1,3 +1,4 @@
+const RequestLog = require("../models/RequestLog");
 const mongoose = require("mongoose");
 const Endpoint = require("../models/endpoint");
 const Project = require("../models/project");
@@ -10,14 +11,40 @@ function matchRoute(dbPath, requestedPath) {
   const dbParts = dbPath.split("/").filter(Boolean);
   const reqParts = requestedPath.split("/").filter(Boolean);
 
-  if (dbParts.length !== reqParts.length) return false;
-
-  for (let i = 0; i < dbParts.length; i++) {
-    if (dbParts[i].startsWith(":")) continue;
-    if (dbParts[i] !== reqParts[i]) return false;
+  // ❌ Different lengths → no match
+  if (dbParts.length !== reqParts.length) {
+    return {
+      match: false,
+      params: {}
+    };
   }
 
-  return true;
+  const params = {};
+
+  for (let i = 0; i < dbParts.length; i++) {
+    const dbPart = dbParts[i];
+    const reqPart = reqParts[i];
+
+    // ✅ Dynamic param
+    if (dbPart.startsWith(":")) {
+      const paramName = dbPart.slice(1);
+      params[paramName] = reqPart;
+      continue;
+    }
+
+    // ❌ Static mismatch
+    if (dbPart !== reqPart) {
+      return {
+        match: false,
+        params: {}
+      };
+    }
+  }
+
+  return {
+    match: true,
+    params
+  };
 }
 
 /* ----------------------------------
@@ -112,6 +139,8 @@ exports.handleMockRequest = async (req, res) => {
 
     const method = req.method.toUpperCase();
 
+    const startTime = Date.now();
+
     console.log("Requested Path:", requestedPath);
 
     /* ----------------------------
@@ -160,10 +189,19 @@ exports.handleMockRequest = async (req, res) => {
         ? endpoint.path
         : "/" + endpoint.path;
 
-      if (matchRoute(normalizedDbPath, requestedPath)) {
-        matchedEndpoint = endpoint;
-        break;
-      }
+      const routeMatch = matchRoute(
+  normalizedDbPath,
+  requestedPath
+);
+
+if (routeMatch.match) {
+  matchedEndpoint = endpoint;
+
+  // ✅ attach params to request
+  req.params.dynamicParams = routeMatch.params;
+
+  break;
+}
     }
 
     if (!matchedEndpoint) {
@@ -200,14 +238,32 @@ exports.handleMockRequest = async (req, res) => {
        6️⃣ Generate Response
     ----------------------------- */
 // ✅ PRIORITY 1 → Manual JSON response
+
 if (
   matchedEndpoint.response &&
   matchedEndpoint.response !== "{}"
 ) {
   try {
+    const parsedResponse = JSON.parse(
+      matchedEndpoint.response
+    );
+
+    const responseTime = Date.now() - startTime;
+
+    await RequestLog.create({
+      projectId: project._id,
+      endpoint: requestedPath,
+      method: req.method,
+      statusCode: matchedEndpoint.statusCode || 200,
+      responseTime,
+      ip: req.ip,
+      userAgent: req.headers["user-agent"]
+    });
+
     return res
       .status(matchedEndpoint.statusCode || 200)
-      .json(JSON.parse(matchedEndpoint.response));
+      .json(parsedResponse);
+
   } catch (err) {
     return res.status(500).json({
       success: false,
@@ -234,6 +290,18 @@ const results = [];
 for (let i = 0; i < (count || 1); i++) {
   results.push(generateObject(fields));
 }
+
+const responseTime = Date.now() - startTime;
+
+await RequestLog.create({
+  projectId: project._id,
+  endpoint: requestedPath,
+  method: req.method,
+  statusCode: matchedEndpoint.statusCode || 200,
+  responseTime,
+  ip: req.ip,
+  userAgent: req.headers["user-agent"]
+});
 
 return res
   .status(matchedEndpoint.statusCode || 200)
