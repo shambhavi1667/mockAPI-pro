@@ -21,7 +21,9 @@
     "ioredis": "^5.10.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.2",
-    "nanoid": "^5.1.6"
+    "nanoid": "^5.1.6",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

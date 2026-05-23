@@ -260,9 +260,13 @@ if (
       userAgent: req.headers["user-agent"]
     });
 
-    return res
-      .status(matchedEndpoint.statusCode || 200)
-      .json(parsedResponse);
+   return res
+  .status(matchedEndpoint.statusCode || 200)
+  .json(
+    (count || 1) === 1
+      ? results[0]
+      : results
+  );
 
   } catch (err) {
     return res.status(500).json({

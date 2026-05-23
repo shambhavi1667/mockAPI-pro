@@ -144,11 +144,27 @@ const getProjectAnalytics = async (req, res, next) => {
   }
 };
 
+const getProjectLogs = async (req, res, next) => {
+  try {
+    const logs = await RequestLog.find({
+      projectId: req.params.id
+    })
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    res.json(logs);
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createProject,
   getProjects,
   getProjectById, // ⭐ IMPORTANT ADD
   updateProject,
   deleteProject,
-  getProjectAnalytics
+  getProjectAnalytics,
+  getProjectLogs
 };

@@ -14,6 +14,8 @@ const projectRoutes = require("./routes/projectRoutes");
 const endpointRoutes = require("./routes/endpointRoutes");
 const mockRoutes = require("./routes/mockRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
 
 const app = express();
 
@@ -25,6 +27,11 @@ app.use(express.json());
 app.use(helmet());
 
 // ----------------------
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec)
+);
 // Routes
 // ----------------------
 

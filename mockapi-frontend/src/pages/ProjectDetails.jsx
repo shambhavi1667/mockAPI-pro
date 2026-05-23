@@ -20,6 +20,12 @@ function ProjectDetails() {
   const [responseBody, setResponseBody] = useState("");
   const [showSaved, setShowSaved] = useState(false);
   const [analytics, setAnalytics] = useState(null);
+  const [testPath, setTestPath] = useState("");
+const [testMethod, setTestMethod] = useState("GET");
+const [testResponse, setTestResponse] = useState(null);
+const [loadingTest, setLoadingTest] = useState(false);
+const [responseStatus, setResponseStatus] = useState(null);
+const [responseTime, setResponseTime] = useState(null);
 
   const token = localStorage.getItem("token");
 
@@ -31,7 +37,10 @@ useEffect(() => {
     },
   })
     .then((res) => res.json())
-    .then(setProject);
+    .then((data) => {
+  console.log(data);
+  setProject(data.project || data);
+});
 
   // ✅ Fetch endpoints
   fetch(`http://localhost:5000/api/projects/${id}/endpoints`, {
@@ -134,6 +143,42 @@ setTimeout(() => setShowSaved(false), 2000);
     alert("Failed to save");
   }
 };
+const handleTestApi = async () => {
+  try {
+    setLoadingTest(true);
+
+    console.log(project);
+    console.log("API KEY:", project?.apiKey);
+    const start = Date.now();
+    const response = await fetch(
+      `http://localhost:5000/mock/${id}${testPath}`,
+      {
+        method: testMethod,
+        headers: {
+          "x-api-key": project?.apiKey || "",
+        },
+      }
+    );
+
+    const data = await response.json();
+    const end = Date.now();
+
+setResponseTime(end - start);
+setResponseStatus(response.status);
+
+    setTestResponse(data);
+
+  } catch (err) {
+    console.error(err);
+
+    setTestResponse({
+      error: "Request failed",
+    });
+
+  } finally {
+    setLoadingTest(false);
+  }
+};
 
   if (!project) return <div className="text-white p-10">Loading...</div>;
 
@@ -187,6 +232,68 @@ setTimeout(() => setShowSaved(false), 2000);
           <h2 className="text-lg font-semibold mb-4 text-gray-300">
             Endpoints
           </h2>
+          {/* API TEST CONSOLE */}
+<div className="mb-8">
+
+  <h2 className="text-2xl font-bold mb-4">
+    API Testing Console
+  </h2>
+
+  <div className="bg-[#111] border border-white/10 rounded-xl p-5">
+
+    <div className="flex gap-3 mb-4">
+
+      <select
+        value={testMethod}
+        onChange={(e) =>
+          setTestMethod(e.target.value)
+        }
+        className="bg-black border border-gray-700 rounded-lg px-4 py-2"
+      >
+        <option>GET</option>
+        <option>POST</option>
+        <option>PUT</option>
+        <option>DELETE</option>
+      </select>
+
+      <input
+        type="text"
+        placeholder="/users"
+        value={testPath}
+        onChange={(e) =>
+          setTestPath(e.target.value)
+        }
+        className="flex-1 bg-black border border-gray-700 rounded-lg px-4 py-2"
+      />
+
+      <button
+        onClick={handleTestApi}
+        className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-lg font-semibold"
+      >
+        {loadingTest ? "Testing..." : "Send"}
+      </button>
+    </div>
+
+    {testResponse && (
+      <pre className="bg-black p-4 rounded-lg overflow-auto text-sm">
+        {JSON.stringify(testResponse, null, 2)}
+        {responseStatus && (
+  <div className="flex gap-4 mb-3 text-sm">
+
+    <div className="bg-black px-3 py-1 rounded-lg border border-gray-700">
+      Status: {responseStatus}
+    </div>
+
+    <div className="bg-black px-3 py-1 rounded-lg border border-gray-700">
+      Time: {responseTime} ms
+    </div>
+
+  </div>
+)}
+      </pre>
+    )}
+  </div>
+</div>
           {/* ANALYTICS */}
 {analytics && (
   <div className="mb-8">

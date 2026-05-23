@@ -1,7 +1,7 @@
 const redis = require("../utils/redis");
 
-const RATE_LIMIT = 100;       // requests
-const WINDOW = 60 * 60;      // 1 hour in seconds
+const RATE_LIMIT = 100;
+const WINDOW = 60 * 60;
 
 const rateLimiter = async (req, res, next) => {
   try {
@@ -9,7 +9,11 @@ const rateLimiter = async (req, res, next) => {
 
     if (!apiKey) {
       return res.status(401).json({
-        error: "API key required"
+        success: false,
+        error: {
+          code: "API_KEY_REQUIRED",
+          message: "API key required"
+        }
       });
     }
 
@@ -23,9 +27,25 @@ const rateLimiter = async (req, res, next) => {
 
     if (requests > RATE_LIMIT) {
       return res.status(429).json({
-        error: "Too many requests. Try again later."
+        success: false,
+        error: {
+          code: "RATE_LIMIT_EXCEEDED",
+          message:
+            "Too many requests. Try again later."
+        }
       });
     }
+
+    // Professional headers
+    res.setHeader(
+      "X-RateLimit-Limit",
+      RATE_LIMIT
+    );
+
+    res.setHeader(
+      "X-RateLimit-Remaining",
+      Math.max(0, RATE_LIMIT - requests)
+    );
 
     next();
 
