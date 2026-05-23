@@ -1,3 +1,12 @@
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer
+} from "recharts";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -10,22 +19,42 @@ function ProjectDetails() {
   const [selectedEndpoint, setSelectedEndpoint] = useState(null);
   const [responseBody, setResponseBody] = useState("");
   const [showSaved, setShowSaved] = useState(false);
+  const [analytics, setAnalytics] = useState(null);
 
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    fetch(`http://localhost:5000/api/projects/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then(setProject);
+useEffect(() => {
+  // ✅ Fetch project
+  fetch(`http://localhost:5000/api/projects/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => res.json())
+    .then(setProject);
 
-    fetch(`http://localhost:5000/api/projects/${id}/endpoints`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then(setEndpoints);
-  }, [id, token]);
+  // ✅ Fetch endpoints
+  fetch(`http://localhost:5000/api/projects/${id}/endpoints`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => res.json())
+    .then(setEndpoints);
+
+  // ✅ Fetch analytics
+  fetch(`http://localhost:5000/api/projects/${id}/analytics`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Analytics:", data);
+      setAnalytics(data);
+    });
+
+}, [id, token]);
 
  const createEndpoint = async () => {
   const path = prompt("Enter endpoint path");
@@ -158,7 +187,66 @@ setTimeout(() => setShowSaved(false), 2000);
           <h2 className="text-lg font-semibold mb-4 text-gray-300">
             Endpoints
           </h2>
+          {/* ANALYTICS */}
+{analytics && (
+  <div className="mb-8">
 
+    <h2 className="text-2xl font-bold mb-5">
+      Analytics
+    </h2>
+
+    {/* STATS CARDS */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+      <div className="bg-[#111] border border-white/10 rounded-xl p-5">
+        <p className="text-gray-400 text-sm">
+          Total Requests
+        </p>
+
+        <h3 className="text-3xl font-bold mt-2">
+          {analytics.totalRequests}
+        </h3>
+      </div>
+
+      <div className="bg-[#111] border border-white/10 rounded-xl p-5">
+        <p className="text-gray-400 text-sm">
+          Top Endpoint
+        </p>
+
+        <h3 className="text-lg font-semibold mt-2 break-all">
+          {analytics.topEndpoints?.[0]?._id || "N/A"}
+        </h3>
+      </div>
+    </div>
+
+    {/* CHART */}
+    <div className="bg-[#111] border border-white/10 rounded-xl p-5 h-[320px]">
+
+      <ResponsiveContainer width="100%" height="100%">
+
+        <LineChart
+          data={analytics.requestsOverTime}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+
+          <XAxis dataKey="_id.day" />
+
+          <YAxis />
+
+          <Tooltip />
+
+          <Line
+            type="monotone"
+            dataKey="count"
+            stroke="#22c55e"
+            strokeWidth={3}
+          />
+        </LineChart>
+
+      </ResponsiveContainer>
+    </div>
+  </div>
+)}
           {/* LIST */}
           {endpoints.length === 0 ? (
             <p className="text-gray-500">No endpoints yet 🚀</p>
