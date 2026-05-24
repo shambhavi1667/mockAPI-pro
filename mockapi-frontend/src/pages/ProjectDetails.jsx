@@ -18,32 +18,54 @@ function ProjectDetails() {
 
   const [project, setProject] = useState(null);
   const [endpoints, setEndpoints] = useState([]);
-  const [selectedEndpoint, setSelectedEndpoint] = useState(null);
+  const [selectedEndpoint, setSelectedEndpoint] =
+    useState(null);
 
-  const [responseBody, setResponseBody] = useState("");
-  const [showSaved, setShowSaved] = useState(false);
+  const [responseBody, setResponseBody] =
+    useState("");
 
-  const [analytics, setAnalytics] = useState(null);
+  const [showSaved, setShowSaved] =
+    useState(false);
+
+  const [analytics, setAnalytics] =
+    useState(null);
+
   const [logs, setLogs] = useState([]);
 
-  const [testPath, setTestPath] = useState("");
-  const [testMethod, setTestMethod] = useState("GET");
-  const [testResponse, setTestResponse] = useState(null);
+  const [testPath, setTestPath] =
+    useState("");
 
-  const [loadingTest, setLoadingTest] = useState(false);
-  const [responseStatus, setResponseStatus] = useState(null);
-  const [responseTime, setResponseTime] = useState(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [logSearch, setLogSearch] = useState("");
+  const [testMethod, setTestMethod] =
+    useState("GET");
 
-const [newEndpointPath, setNewEndpointPath] = useState("");
+  const [testResponse, setTestResponse] =
+    useState(null);
 
-const [newEndpointMethod, setNewEndpointMethod] =
-  useState("GET");
+  const [loadingTest, setLoadingTest] =
+    useState(false);
+
+  const [responseStatus, setResponseStatus] =
+    useState(null);
+
+  const [responseTime, setResponseTime] =
+    useState(null);
+
+  const [showCreateModal, setShowCreateModal] =
+    useState(false);
+
+  const [newEndpointPath, setNewEndpointPath] =
+    useState("");
+
+  const [newEndpointMethod, setNewEndpointMethod] =
+    useState("GET");
+
+  const [logSearch, setLogSearch] =
+    useState("");
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
+
     // FETCH PROJECT
     fetch(`http://localhost:5000/api/projects/${id}`, {
       headers: {
@@ -56,31 +78,40 @@ const [newEndpointMethod, setNewEndpointMethod] =
       });
 
     // FETCH ENDPOINTS
-    fetch(`http://localhost:5000/api/projects/${id}/endpoints`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    fetch(
+      `http://localhost:5000/api/projects/${id}/endpoints`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
       .then((res) => res.json())
       .then(setEndpoints);
 
     // FETCH ANALYTICS
-    fetch(`http://localhost:5000/api/projects/${id}/analytics`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    fetch(
+      `http://localhost:5000/api/projects/${id}/analytics`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         setAnalytics(data);
       });
 
     // FETCH LOGS
-    fetch(`http://localhost:5000/api/projects/${id}/logs`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    fetch(
+      `http://localhost:5000/api/projects/${id}/logs`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         setLogs(data.logs || data || []);
@@ -90,57 +121,63 @@ const [newEndpointMethod, setNewEndpointMethod] =
 
   // CREATE ENDPOINT
   const createEndpoint = async () => {
+
     if (!newEndpointPath.trim()) return;
-  try {
-    const res = await fetch(
-      `http://localhost:5000/api/projects/${id}/endpoints`,
-      {
-        method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+    try {
 
-        body: JSON.stringify({
-          path: newEndpointPath,
-          method: newEndpointMethod,
+      const res = await fetch(
+        `http://localhost:5000/api/projects/${id}/endpoints`,
+        {
+          method: "POST",
 
-          responseSchema: {
-            count: 1,
-            fields: [
-              {
-                name: "message",
-                type: "string",
-              },
-            ],
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-        }),
-      }
-    );
 
-    const data = await res.json();
+          body: JSON.stringify({
+            path: newEndpointPath,
+            method: newEndpointMethod,
 
-    setEndpoints((prev) => [...prev, data]);
-    toast.success("Endpoint created");
+            responseSchema: {
+              count: 1,
 
-    setShowCreateModal(false);
+              fields: [
+                {
+                  name: "message",
+                  type: "string",
+                },
+              ],
+            },
+          }),
+        }
+      );
 
-    setNewEndpointPath("");
+      const data = await res.json();
 
-    setNewEndpointMethod("GET");
+      setEndpoints((prev) => [...prev, data]);
 
-  } catch (err) {
-    console.error(err);
-  }
-};
+      toast.success("Endpoint created");
+
+      setShowCreateModal(false);
+
+      setNewEndpointPath("");
+      setNewEndpointMethod("GET");
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // DELETE ENDPOINT
   const deleteEndpoint = async (endpointId) => {
+
     await fetch(
       `http://localhost:5000/api/endpoints/${endpointId}`,
       {
         method: "DELETE",
+
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -150,12 +187,15 @@ const [newEndpointMethod, setNewEndpointMethod] =
     setEndpoints((prev) =>
       prev.filter((e) => e._id !== endpointId)
     );
+
     toast.success("Endpoint deleted");
   };
 
-  // SAVE ENDPOINT RESPONSE
+  // SAVE ENDPOINT
   const saveEndpoint = async () => {
+
     try {
+
       const res = await fetch(
         `http://localhost:5000/api/endpoints/${selectedEndpoint._id}`,
         {
@@ -176,11 +216,14 @@ const [newEndpointMethod, setNewEndpointMethod] =
 
       setEndpoints((prev) =>
         prev.map((ep) =>
-          ep._id === updated._id ? updated : ep
+          ep._id === updated._id
+            ? updated
+            : ep
         )
       );
 
       setSelectedEndpoint(updated);
+
       toast.success("Endpoint saved");
 
       setShowSaved(true);
@@ -190,14 +233,18 @@ const [newEndpointMethod, setNewEndpointMethod] =
       }, 2000);
 
     } catch (err) {
+
       console.error(err);
+
       toast.error("Failed to save");
     }
   };
 
   // TEST API
   const handleTestApi = async () => {
+
     try {
+
       setLoadingTest(true);
 
       const start = Date.now();
@@ -231,6 +278,7 @@ const [newEndpointMethod, setNewEndpointMethod] =
       setTestResponse(data);
 
     } catch (err) {
+
       console.error(err);
 
       setTestResponse({
@@ -242,38 +290,38 @@ const [newEndpointMethod, setNewEndpointMethod] =
     }
   };
 
- if (!project) {
-  return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+  if (!project) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
 
-      <div className="animate-pulse space-y-4 w-[400px]">
+        <div className="animate-pulse space-y-4 w-[400px]">
 
-        <div className="h-10 bg-zinc-800 rounded-lg"></div>
+          <div className="h-10 bg-zinc-800 rounded-lg"></div>
 
-        <div className="h-6 bg-zinc-900 rounded-lg w-2/3"></div>
+          <div className="h-6 bg-zinc-900 rounded-lg w-2/3"></div>
 
-        <div className="h-40 bg-zinc-900 rounded-xl"></div>
+          <div className="h-40 bg-zinc-900 rounded-xl"></div>
 
-        <div className="h-24 bg-zinc-900 rounded-xl"></div>
+          <div className="h-24 bg-zinc-900 rounded-xl"></div>
+
+        </div>
 
       </div>
-
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#020202] via-[#0a0a0a] to-[#111111] text-white">
 
       <div className="max-w-5xl mx-auto px-4 md:px-10 py-6 relative z-10">
 
-        {/* PANEL */}
         <div className="bg-gradient-to-b from-[#0a0a0a] to-[#050505] border border-white/10 rounded-2xl p-8">
 
           {/* HEADER */}
           <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-12">
 
             <div>
+
               <button
                 onClick={() => navigate("/dashboard")}
                 className="text-gray-400 hover:text-white mb-4"
@@ -288,42 +336,43 @@ const [newEndpointMethod, setNewEndpointMethod] =
               <p className="text-gray-500 mt-2">
                 {project.description || "No description yet"}
               </p>
+
               <div className="mt-4 flex items-center gap-3">
 
-  <div className="bg-black border border-white/10 px-4 py-2 rounded-lg text-sm font-mono text-gray-300 break-all">
-    {project.apiKey}
-  </div>
+                <div className="bg-black border border-white/10 px-4 py-2 rounded-lg text-sm font-mono text-gray-300 break-all">
+                  {project.apiKey}
+                </div>
 
-  <button
-    onClick={() => {
-      navigator.clipboard.writeText(project.apiKey);
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      project.apiKey
+                    );
 
-      toast.success("API Key copied");
-    }}
-    className="px-3 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition"
-  >
-    Copy
-  </button>
+                    toast.success("API Key copied");
+                  }}
+                  className="px-3 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition"
+                >
+                  Copy
+                </button>
 
-</div>
+              </div>
+
             </div>
 
-          <button
-  onClick={() => setShowCreateModal(true)}
-  className="px-5 py-2 bg-white text-black rounded-lg"
->
-  + Add Endpoint
-</button>
+            <button
+              onClick={() =>
+                setShowCreateModal(true)
+              }
+              className="px-5 py-2 bg-white text-black rounded-lg"
+            >
+              + Add Endpoint
+            </button>
 
           </div>
 
-          {/* ENDPOINTS TITLE */}
-          <h2 className="text-lg font-semibold mb-4 text-gray-300">
-            Endpoints
-          </h2>
-
-          {/* API TEST CONSOLE */}
-          <div className="mb-8">
+          {/* API TESTING */}
+          <div className="mb-10">
 
             <h2 className="text-2xl font-bold mb-4">
               API Testing Console
@@ -360,7 +409,9 @@ const [newEndpointMethod, setNewEndpointMethod] =
                   onClick={handleTestApi}
                   className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-lg font-semibold"
                 >
-                  {loadingTest ? "Testing..." : "Send"}
+                  {loadingTest
+                    ? "Testing..."
+                    : "Send"}
                 </button>
 
               </div>
@@ -380,17 +431,22 @@ const [newEndpointMethod, setNewEndpointMethod] =
                   </div>
 
                   <pre className="bg-black p-4 rounded-lg overflow-auto text-sm">
-                    {JSON.stringify(testResponse, null, 2)}
+                    {JSON.stringify(
+                      testResponse,
+                      null,
+                      2
+                    )}
                   </pre>
                 </>
               )}
 
             </div>
+
           </div>
 
           {/* ANALYTICS */}
           {analytics && (
-            <div className="mb-8">
+            <div className="mb-10">
 
               <h2 className="text-2xl font-bold mb-5">
                 Analytics
@@ -398,7 +454,7 @@ const [newEndpointMethod, setNewEndpointMethod] =
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 
-                <div className="bg-[#111] border border-white/10 rounded-xl p-5">
+                <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-white/10 rounded-xl p-5">
 
                   <p className="text-gray-400 text-sm">
                     Total Requests
@@ -410,7 +466,7 @@ const [newEndpointMethod, setNewEndpointMethod] =
 
                 </div>
 
-                <div className="bg-[#111] border border-white/10 rounded-xl p-5">
+                <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-white/10 rounded-xl p-5">
 
                   <p className="text-gray-400 text-sm">
                     Top Endpoint
@@ -424,13 +480,14 @@ const [newEndpointMethod, setNewEndpointMethod] =
 
               </div>
 
-              {/* CHART */}
               <div className="bg-[#111] border border-white/10 rounded-xl p-5 h-[320px]">
 
                 <ResponsiveContainer width="100%" height="100%">
 
                   <LineChart
-                    data={analytics?.requestsOverTime || []}
+                    data={
+                      analytics?.requestsOverTime || []
+                    }
                   >
                     <CartesianGrid strokeDasharray="3 3" />
 
@@ -462,195 +519,281 @@ const [newEndpointMethod, setNewEndpointMethod] =
             <h2 className="text-2xl font-bold mb-4">
               Recent Logs
             </h2>
+
             <input
-  type="text"
-  placeholder="Search logs..."
-  value={logSearch}
-  onChange={(e) =>
-    setLogSearch(e.target.value)
-  }
-  className="w-full mb-4 bg-black border border-white/10 rounded-lg px-4 py-3"
-/>
+              type="text"
+              placeholder="Search logs..."
+              value={logSearch}
+              onChange={(e) =>
+                setLogSearch(e.target.value)
+              }
+              className="w-full mb-4 bg-black border border-white/10 rounded-lg px-4 py-3"
+            />
 
             <div className="space-y-3">
 
-              {logs.length === 0 && (
-                <p className="text-zinc-500">
-                  No requests yet
-                </p>
-              )}
-
               {logs
-  .filter((log) =>
-    log.endpoint
-      .toLowerCase()
-      .includes(logSearch.toLowerCase())
-  )
-  .map((log) => (
-                <div
-                  key={log._id}
-                  className="bg-zinc-900 border border-zinc-800 rounded-xl p-4"
-                >
+                .filter((log) =>
+                  log.endpoint
+                    .toLowerCase()
+                    .includes(
+                      logSearch.toLowerCase()
+                    )
+                )
+                .map((log) => (
 
-                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-3">
+                  <div
+                    key={log._id}
+                    className="bg-zinc-900 border border-zinc-800 rounded-xl p-4"
+                  >
 
-                    <div>
-                      <p className="font-semibold text-green-400">
-                        {log.method}
-                      </p>
+                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-3">
 
-                      <p className="text-sm text-zinc-300">
-                        {log.endpoint}
-                      </p>
-                    </div>
+                      <div>
 
-                    <div className="text-right">
+                        <p className="font-semibold text-green-400">
+                          {log.method}
+                        </p>
 
-                     <span
-  className={`px-3 py-1 rounded-full text-xs font-semibold ${
-    log.statusCode >= 200 &&
-    log.statusCode < 300
-      ? "bg-green-500/10 text-green-400"
+                        <p className="text-sm text-zinc-300">
+                          {log.endpoint}
+                        </p>
 
-      : log.statusCode >= 400 &&
-        log.statusCode < 500
-      ? "bg-yellow-500/10 text-yellow-400"
+                      </div>
 
-      : "bg-red-500/10 text-red-400"
-  }`}
->
-  {log.statusCode}
-</span>
+                      <div className="text-right">
 
-                      <p className="text-xs text-zinc-500">
-                        {log.responseTime} ms
-                      </p>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            log.statusCode >= 200 &&
+                            log.statusCode < 300
+                              ? "bg-green-500/10 text-green-400"
+                              : log.statusCode >= 400 &&
+                                log.statusCode < 500
+                              ? "bg-yellow-500/10 text-yellow-400"
+                              : "bg-red-500/10 text-red-400"
+                          }`}
+                        >
+                          {log.statusCode}
+                        </span>
+
+                        <div className="text-xs text-zinc-500 mt-2">
+
+                          <p>
+                            {log.responseTime} ms
+                          </p>
+
+                          <p>
+                            {new Date(
+                              log.createdAt
+                            ).toLocaleString()}
+                          </p>
+
+                        </div>
+
+                      </div>
 
                     </div>
 
                   </div>
 
-                </div>
-              ))}
+                ))}
 
             </div>
+
           </div>
 
           {/* ENDPOINT LIST */}
           <div className="space-y-5 mt-10">
 
-            {endpoints.map((ep) => (
-              <div
-                key={ep._id}
-                onClick={() => {
-                  setSelectedEndpoint(ep);
-                  setResponseBody(ep.response || "{}");
-                }}
-               className="p-5 bg-[#111] border border-white/10 rounded-xl flex flex-col md:flex-row justify-between md:items-center gap-4 cursor-pointer hover:border-white/20 hover:scale-[1.01] transition-all duration-200"
-              >
+            {endpoints.length === 0 ? (
 
-                <div>
+              <div className="bg-[#111] border border-dashed border-white/10 rounded-2xl p-10 text-center">
 
-                  <span className="px-2 py-1 text-xs rounded bg-green-500/10 text-green-400">
-                    {ep.method}
-                  </span>
+                <p className="text-xl font-semibold mb-2">
+                  No endpoints yet 🚀
+                </p>
 
-                  <p className="text-gray-400 mt-2">
-                    {ep.path}
-                  </p>
+                <p className="text-gray-500">
+                  Create your first mock API endpoint
+                </p>
+
+              </div>
+
+            ) : (
+
+              endpoints.map((ep) => (
+
+                <div
+                  key={ep._id}
+                  onClick={() => {
+                    setSelectedEndpoint(ep);
+                    setResponseBody(
+                      ep.response || "{}"
+                    );
+                  }}
+                  className="p-5 bg-[#111] border border-white/10 rounded-xl flex flex-col md:flex-row justify-between md:items-center gap-4 cursor-pointer hover:border-white/20 hover:scale-[1.01] transition-all duration-200"
+                >
+
+                  <div>
+
+                    <span
+                      className={`px-2 py-1 text-xs rounded font-semibold ${
+                        ep.method === "GET"
+                          ? "bg-green-500/10 text-green-400"
+                          : ep.method === "POST"
+                          ? "bg-blue-500/10 text-blue-400"
+                          : ep.method === "PUT"
+                          ? "bg-yellow-500/10 text-yellow-400"
+                          : "bg-red-500/10 text-red-400"
+                      }`}
+                    >
+                      {ep.method}
+                    </span>
+
+                    <div className="flex items-center gap-3 mt-2 flex-wrap">
+
+                      <p className="text-gray-400">
+                        {ep.path}
+                      </p>
+
+                      <button
+                        onClick={(e) => {
+
+                          e.stopPropagation();
+
+                          navigator.clipboard.writeText(
+                            `http://localhost:5000/mock/${id}${ep.path}`
+                          );
+
+                          toast.success(
+                            "Mock URL copied"
+                          );
+                        }}
+                        className="text-xs px-2 py-1 rounded bg-white/10 hover:bg-white/20"
+                      >
+                        Copy URL
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+
+                      e.stopPropagation();
+
+                      if (
+                        window.confirm(
+                          "Delete this endpoint?"
+                        )
+                      ) {
+                        deleteEndpoint(ep._id);
+                      }
+                    }}
+                    className="text-red-400 border border-red-400/30 px-3 py-1 rounded-md"
+                  >
+                    Delete
+                  </button>
 
                 </div>
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (window.confirm("Delete this endpoint?")) {
-  deleteEndpoint(ep._id);
-}
-                  }}
-                  className="text-red-400 border border-red-400/30 px-3 py-1 rounded-md"
-                >
-                  Delete
-                </button>
+              ))
 
-              </div>
-            ))}
+            )}
 
           </div>
 
         </div>
+
       </div>
+
+      {/* CREATE MODAL */}
       {showCreateModal && (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-<div className="bg-[#111] border border-white/10 rounded-2xl p-6 w-[400px]">
 
-      <h2 className="text-2xl font-bold mb-6">
-        Create Endpoint
-      </h2>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
 
-      <div className="space-y-4">
+          <div className="bg-[#111] border border-white/10 rounded-2xl p-6 w-[400px]">
 
-        <input
-          type="text"
-          placeholder="/users"
-          value={newEndpointPath}
-          onChange={(e) =>
-            setNewEndpointPath(e.target.value)
-          }
-          className="w-full bg-black border border-white/10 rounded-lg px-4 py-3"
-        />
+            <h2 className="text-2xl font-bold mb-6">
+              Create Endpoint
+            </h2>
 
-        <select
-          value={newEndpointMethod}
-          onChange={(e) =>
-            setNewEndpointMethod(e.target.value)
-          }
-          className="w-full bg-black border border-white/10 rounded-lg px-4 py-3"
-        >
-          <option>GET</option>
-          <option>POST</option>
-          <option>PUT</option>
-          <option>DELETE</option>
-        </select>
+            <div className="space-y-4">
 
-      </div>
+              <input
+                type="text"
+                placeholder="/users"
+                value={newEndpointPath}
+                onChange={(e) =>
+                  setNewEndpointPath(
+                    e.target.value
+                  )
+                }
+                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3"
+              />
 
-      <div className="flex justify-end gap-3 mt-6">
+              <select
+                value={newEndpointMethod}
+                onChange={(e) =>
+                  setNewEndpointMethod(
+                    e.target.value
+                  )
+                }
+                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3"
+              >
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>DELETE</option>
+              </select>
 
-        <button
-          onClick={() => setShowCreateModal(false)}
-          className="px-4 py-2 border border-white/10 rounded-lg"
-        >
-          Cancel
-        </button>
+            </div>
 
-        <button
-          onClick={createEndpoint}
-          className="px-4 py-2 bg-white text-black rounded-lg"
-        >
-          Create
-        </button>
+            <div className="flex justify-end gap-3 mt-6">
 
-      </div>
+              <button
+                onClick={() =>
+                  setShowCreateModal(false)
+                }
+                className="px-4 py-2 border border-white/10 rounded-lg"
+              >
+                Cancel
+              </button>
 
-    </div>
+              <button
+                onClick={createEndpoint}
+                className="px-4 py-2 bg-white text-black rounded-lg"
+              >
+                Create
+              </button>
 
-  </div>
-)}
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
 
       {/* SIDE PANEL */}
       {selectedEndpoint && (
+
         <div className="fixed right-0 top-0 h-full w-full md:w-[420px] bg-[#0a0a0a] border-l border-white/10 p-6 z-50">
 
           <button
-            onClick={() => setSelectedEndpoint(null)}
+            onClick={() =>
+              setSelectedEndpoint(null)
+            }
             className="text-gray-400 hover:text-white mb-4"
           >
             ✕ Close
           </button>
 
           <h2 className="text-xl font-semibold mb-6">
-            {selectedEndpoint.method} {selectedEndpoint.path}
+            {selectedEndpoint.method}{" "}
+            {selectedEndpoint.path}
           </h2>
 
           <div className="mb-4">
@@ -662,7 +805,9 @@ const [newEndpointMethod, setNewEndpointMethod] =
             <textarea
               value={responseBody}
               onChange={(e) =>
-                setResponseBody(e.target.value)
+                setResponseBody(
+                  e.target.value
+                )
               }
               className="w-full mt-2 p-3 bg-black border border-white/10 rounded-lg h-40 text-green-400 font-mono text-sm"
             />
@@ -683,6 +828,7 @@ const [newEndpointMethod, setNewEndpointMethod] =
           </div>
 
         </div>
+
       )}
 
     </div>
